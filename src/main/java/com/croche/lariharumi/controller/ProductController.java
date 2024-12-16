@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.croche.lariharumi.dto.ProductDTO;
 import com.croche.lariharumi.models.Category.Category;
 import com.croche.lariharumi.models.Product.Product;
 import com.croche.lariharumi.service.ProductService;
@@ -19,8 +20,9 @@ public class ProductController {
 
     // Endpoint para criar um produto
     @PostMapping
-    public Product createProduct(@RequestParam String name, @RequestParam String description, @RequestParam String price, @RequestParam Category category) {
-        return productService.createProduct(name, description, price, category);
+    public Product createProduct(@RequestBody ProductDTO productDTO) {
+        // Convertendo o DTO para a entidade Product, se necessário
+        return productService.createProduct(productDTO);
     }
 
     // Endpoint para obter todos os produtos
@@ -37,8 +39,8 @@ public class ProductController {
 
     // Endpoint para atualizar um produto
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Long id, @RequestParam String name, @RequestParam String description, @RequestParam String price, @RequestParam Category category) {
-        return productService.updateProduct(id, name, description, price, category);
+    public Product updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO) {
+        return productService.updateProduct(id, productDTO);
     }
 
     // Endpoint para excluir um produto
@@ -48,3 +50,4 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 }
+

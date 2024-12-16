@@ -3,6 +3,7 @@ package com.croche.lariharumi.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.croche.lariharumi.dto.ProductDTO;
 import com.croche.lariharumi.models.Category.Category;
 import com.croche.lariharumi.models.Product.Product;
 import com.croche.lariharumi.repository.ProductRepository;
@@ -15,12 +16,13 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public Product createProduct(String name, String description, String price, Category category) {
+    // Método para criar um produto
+    public Product createProduct(ProductDTO productDTO) {
         Product product = new Product();
-        product.setName(name);
-        product.setDescription(description);
-        product.setPriceRange(price);
-        product.setCategory(category);  // Example, adjust as per your model
+        product.setName(productDTO.name());
+        product.setDescription(productDTO.description());
+        product.setPriceRange(productDTO.price());
+        product.setCategory(productDTO.category());
         return productRepository.save(product);
     }
 
@@ -32,12 +34,18 @@ public class ProductService {
         return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
-    public Product updateProduct(Long id, String name, String description, String price, Category category) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setName(name);
-        product.setDescription(description);
-        product.setPriceRange(price);
-        product.setCategory(category);
+    public Product updateProduct(Long id, ProductDTO productDTO) {
+        // Busca o produto pelo id
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+    
+        // Atualiza os dados do produto com as informações do DTO
+        product.setName(productDTO.name());
+        product.setDescription(productDTO.description());
+        product.setPriceRange(productDTO.price());
+        product.setCategory(productDTO.category());
+    
+        // Salva as mudanças no banco de dados
         return productRepository.save(product);
     }
 
