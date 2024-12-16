@@ -1,26 +1,12 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:latest
-    container_name: postgres-db
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+  postgres:
+    container_name: laricroche_postgres
+    image: postgres
     ports:
-      - "${DB_PORT}:${DB_PORT}"  # Mapeia a porta configurada no .env
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - app-network
-
-  # Outros serviços, como sua aplicação Spring, podem ser adicionados aqui.
-
-networks:
-  app-network:
-    driver: bridge
-
-volumes:
-  postgres-data:
-    driver: local
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: laricroche
