@@ -55,21 +55,25 @@ public class ProductService {
     public Product updateProduct(Long id, ProductDTO productDTO) {
         // Busca o produto pelo id
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
     
-
-        Category category = categoryRepository.findById(productDTO.categoryId())
-        .orElseThrow(() -> new RuntimeException("Category not found"));
+        // Verifica se o categoryId foi fornecido no DTO e associa a categoria
+        if (productDTO.categoryId() != null) {
+            Category category = categoryRepository.findById(productDTO.categoryId())
+                    .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+            product.setCategory(category);  // Associa a categoria ao produto
+        }
+    
         // Atualiza os dados do produto com as informações do DTO
         product.setName(productDTO.name());
         product.setDescription(productDTO.description());
         product.setImage(productDTO.image());
         product.setPriceRange(productDTO.price());
-        product.setCategory(category);
     
         // Salva as mudanças no banco de dados
         return productRepository.save(product);
     }
+    
 
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));

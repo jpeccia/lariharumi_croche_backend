@@ -76,9 +76,15 @@ public class ProductController {
         @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
         @ApiResponse(responseCode = "404", description = "Produto não encontrado")
     })
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductDTO productDTO) {
+    public ResponseEntity<Product> updateProduct(
+            @PathVariable Long id,  // ID do produto a ser atualizado
+            @RequestBody ProductDTO productDTO) {  // Dados do produto para atualização
+
+        // Chama o serviço para atualizar o produto
         Product updatedProduct = productService.updateProduct(id, productDTO);
-        return ResponseEntity.ok(updatedProduct); // 200 OK
+        
+        // Retorna o produto atualizado com status HTTP 200 OK
+        return ResponseEntity.ok(updatedProduct);
     }
 
     @DeleteMapping("/{id}")

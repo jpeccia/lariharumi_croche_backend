@@ -2,7 +2,6 @@ package com.croche.lariharumi.controller;
 
 import com.croche.lariharumi.dto.UserDTO;
 import com.croche.lariharumi.dto.UserUpdateDTO;
-import com.croche.lariharumi.models.User.User;
 import com.croche.lariharumi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
