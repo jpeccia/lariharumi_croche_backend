@@ -1,12 +1,15 @@
 package com.croche.lariharumi.service;
 
+import com.croche.lariharumi.dto.UserDTO;
+import com.croche.lariharumi.dto.UserUpdateDTO;
+import com.croche.lariharumi.exceptions.UserNotFoundException;
+import com.croche.lariharumi.models.User.User;
+import com.croche.lariharumi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.croche.lariharumi.models.User.User;
-import com.croche.lariharumi.repository.UserRepository;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -14,23 +17,38 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    // Obter todos os usuários
+    public List<UserDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(user -> new UserDTO(user.getId(), user.getName(), user.getEmail()))
+                .collect(Collectors.toList());
     }
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    // Obter usuário por ID
+    public UserDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuário com ID " + id + " não encontrado."));
+        return new UserDTO(user.getId(), user.getName(), user.getEmail());
     }
 
-    public User updateUser(Long id, String name, String email) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setName(name);
-        user.setEmail(email);
-        return userRepository.save(user);
+    // Atualizar usuário
+    public UserDTO updateUser(Long id, UserUpdateDTO userUpdateDTO) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuário com ID " + id + " não encontrado."));
+
+        user.setName(userUpdateDTO.name());
+        user.setEmail(userUpdateDTO.email());
+
+        User updatedUser = userRepository.save(user);
+
+        return new UserDTO(updatedUser.getId(), updatedUser.getName(), updatedUser.getEmail());
     }
 
+    // Deletar usuário
     public void deleteUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuário com ID " + id + " não encontrado."));
         userRepository.delete(user);
     }
 }

@@ -14,7 +14,7 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
 
         return new OpenAPI()
-        .info(new Info().title("LariCroche").description("Essa api é criada para manipular produtos, usuário administrador de um catalogo de croche.").version("1"))
+        .info(new Info().title("LariCroche").description("Esta API é um sistema completo de gerenciamento e autenticação de usuários, com foco em segurança e controle de acesso. Ela oferece uma variedade de funcionalidades, incluindo o registro, login e a autenticação de usuários, bem como o gerenciamento de produtos em um catálogo. A API utiliza autenticação baseada em tokens JWT para garantir a segurança e o acesso restrito às rotas protegidas.").version("1"))
         .schemaRequirement("jwt_auth", creaSecurityScheme());
     }
 
