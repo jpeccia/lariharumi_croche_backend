@@ -17,7 +17,9 @@ public class CategoryService {
     // Criar nova categoria
     public Category createCategory(CategoryDTO categoryDTO) {
         Category category = new Category();
-        category.setName(categoryDTO.getName());
+        category.setName(categoryDTO.name());
+        category.setDescription(categoryDTO.description());
+        category.setImage(categoryDTO.image());
         return categoryRepository.save(category);
     }
 
@@ -36,7 +38,9 @@ public class CategoryService {
     public Category updateCategory(Long id, CategoryDTO categoryDTO) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-        category.setName(categoryDTO.getName());
+        category.setName(categoryDTO.name());
+        category.setDescription(categoryDTO.description());
+        category.setImage(categoryDTO.image());
         return categoryRepository.save(category);
     }
 
