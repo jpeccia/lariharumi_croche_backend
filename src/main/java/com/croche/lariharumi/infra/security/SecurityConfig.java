@@ -39,8 +39,16 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()  // Permite o login sem autenticação
                     .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()  // Permite o registro sem autenticação
                     .requestMatchers(SWAGGER_LIST).permitAll()  // Permite acesso ao Swagger UI
-                    // As rotas do admin devem ser protegidas e acessíveis apenas para "ADMIN"
-                    .requestMatchers("/admin/**").hasRole("ADMIN")  // Apenas usuários com role ADMIN têm acesso ao admin
+                    // Apenas usuários com a role ROLE_ADMIN têm acesso às rotas de criação, atualização e remoção de produtos e categorias
+                    .requestMatchers(HttpMethod.GET, "/users").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/products").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/products/{id}").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/products/{id}").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/categories").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/categories/{id}").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/categories/{id}").hasAuthority("ROLE_ADMIN")
+                    // As rotas do admin devem ser protegidas e acessíveis apenas para "ROLE_ADMIN"
+                    .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                     // Outras rotas podem ser acessadas por qualquer usuário autenticado
                     .anyRequest().permitAll())  // Permite o acesso a todas as outras rotas sem autenticação
                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)  // Filtro de segurança personalizado para validar tokens, por exemplo, JWT

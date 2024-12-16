@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.croche.lariharumi.dto.ProductDTO;
-import com.croche.lariharumi.models.Category.Category;
 import com.croche.lariharumi.models.Product.Product;
 import com.croche.lariharumi.service.ProductService;
 
@@ -29,6 +28,12 @@ public class ProductController {
     @GetMapping
     public List<Product> getAllProducts() {
         return productService.getAllProducts();
+    }
+
+    // Endpoint para obter todos os produtos por categoria
+    @GetMapping("/category/{categoryId}")
+    public List<Product> getProductsByCategory(@PathVariable Long categoryId) {
+        return productService.getProductsByCategory(categoryId);
     }
 
     // Endpoint para obter um produto por ID

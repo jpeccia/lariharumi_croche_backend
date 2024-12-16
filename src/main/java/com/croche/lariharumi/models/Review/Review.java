@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.croche.lariharumi.models.Product.Product;
 import com.croche.lariharumi.models.User.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,10 +27,12 @@ public class Review {
     private Long id;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
