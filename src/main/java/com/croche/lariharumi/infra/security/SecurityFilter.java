@@ -16,11 +16,14 @@ import com.croche.lariharumi.repository.UserRepository;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.stream.Collectors;  // Importando para usar Collectors
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
+    
     @Autowired
     TokenService tokenService;
+    
     @Autowired
     UserRepository userRepository;
 
@@ -31,7 +34,10 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         if(login != null){
             User user = userRepository.findByEmail(login).orElseThrow(() -> new RuntimeException("User Not Found"));
-            var authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+            
+            // Se 'role' for um único valor (como um enum ou string), ajuste essa parte
+            var authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+
             var authentication = new UsernamePasswordAuthenticationToken(user, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

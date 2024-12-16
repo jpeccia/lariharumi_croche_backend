@@ -8,8 +8,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -17,26 +19,41 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Autowired
-    SecurityFilter securityFilter;
+    private SecurityFilter securityFilter;
 
+    private static final String[] SWAGGER_LIST = {
+        "/swagger-ui/**",
+        "/v3/api-docs/**",
+        "/swagger-resources/**"
+    };
 
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .authorizeRequests(requests -> requests
-                        .requestMatchers("/auth/**").permitAll() // Acesso livre para autenticação
-                        .requestMatchers(HttpMethod.GET, "/reviews/**").hasAnyRole("USER", "ADMIN") // Usuários e admins podem dar reviews
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // Apenas admins podem acessar o painel
-                        .anyRequest().authenticated()
-                        .and().addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class));
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+               .csrf(csrf -> csrf.disable())  // Desabilita CSRF, útil para APIs REST
+               .cors()  // Habilita CORS se necessário
+               .and()
+               .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Desabilita sessões, usando JWT ou outro token
+               .authorizeHttpRequests(authorize -> authorize
+                    // Permitir rotas públicas, como login, registro e Swagger
+                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                    .requestMatchers(SWAGGER_LIST).permitAll()
+                    // Apenas usuários com a role "ADMIN" podem acessar a dashboard personalizada
+                    .requestMatchers("/admin/**").hasRole("ADMIN")
+                    // Outras rotas são acessíveis para qualquer usuário autenticado (se preferir autenticação opcional, remova essa linha)
+                    .anyRequest().authenticated())
+               .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)  // Filtro de segurança personalizado para validar tokens, por exemplo, JWT
+               .build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder();  // Utiliza o BCrypt para criptografar senhas
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+        return authenticationConfiguration.getAuthenticationManager();  // Configura o AuthenticationManager
     }
 }

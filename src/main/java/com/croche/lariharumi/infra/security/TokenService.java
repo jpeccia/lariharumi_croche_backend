@@ -15,38 +15,42 @@ import com.croche.lariharumi.models.User.User;
 
 @Service
 public class TokenService {
+
     @Value("${api.security.token.secret}")
     private String secret;
-    public String generateToken(User user){
+
+    // Geração de token com dados do usuário
+    public String generateToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
 
-            String token = JWT.create()
+            // Geração do token com data de expiração e assunto (usuário)
+            return JWT.create()
                     .withIssuer("login-auth-api")
                     .withSubject(user.getEmail())
-                    .withExpiresAt(this.generateExpirationDate())
+                    .withExpiresAt(this.generateExpirationDate())  // Define a expiração
                     .sign(algorithm);
-            System.out.println("Token: " + token);
-            return token;
-        } catch (JWTCreationException exception){
-            throw new RuntimeException("Error while authenticating");
+        } catch (JWTCreationException exception) {
+            throw new RuntimeException("Erro ao criar token", exception); // Exceção mais detalhada
         }
     }
 
-    public String validateToken(String token){
+    // Validação e verificação de token
+    public String validateToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
                     .withIssuer("login-auth-api")
                     .build()
-                    .verify(token)
-                    .getSubject();
+                    .verify(token)  // Verifica se o token é válido
+                    .getSubject();  // Retorna o email (subjet)
         } catch (JWTVerificationException exception) {
-            return null;
+            return null; // Caso o token seja inválido
         }
     }
 
-    private Instant generateExpirationDate(){
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    // Método que define a data de expiração do token
+    private Instant generateExpirationDate() {
+        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.UTC);  // Usando UTC
     }
 }
