@@ -16,7 +16,6 @@ import com.croche.lariharumi.repository.UserRepository;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.stream.Collectors;  // Importando para usar Collectors
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {

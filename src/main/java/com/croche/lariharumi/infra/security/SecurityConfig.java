@@ -35,14 +35,14 @@ public class SecurityConfig {
                .and()
                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Desabilita sessões, usando JWT ou outro token
                .authorizeHttpRequests(authorize -> authorize
-                    // Permitir rotas públicas, como login, registro e Swagger
-                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                    .requestMatchers(SWAGGER_LIST).permitAll()
-                    // Apenas usuários com a role "ADMIN" podem acessar a dashboard personalizada
-                    .requestMatchers("/admin/**").hasRole("ADMIN")
-                    // Outras rotas são acessíveis para qualquer usuário autenticado (se preferir autenticação opcional, remova essa linha)
-                    .anyRequest().authenticated())
+                    // Permitir rotas públicas como login, registro e Swagger
+                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()  // Permite o login sem autenticação
+                    .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()  // Permite o registro sem autenticação
+                    .requestMatchers(SWAGGER_LIST).permitAll()  // Permite acesso ao Swagger UI
+                    // As rotas do admin devem ser protegidas e acessíveis apenas para "ADMIN"
+                    .requestMatchers("/admin/**").hasRole("ADMIN")  // Apenas usuários com role ADMIN têm acesso ao admin
+                    // Outras rotas podem ser acessadas por qualquer usuário autenticado
+                    .anyRequest().permitAll())  // Permite o acesso a todas as outras rotas sem autenticação
                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)  // Filtro de segurança personalizado para validar tokens, por exemplo, JWT
                .build();
     }
