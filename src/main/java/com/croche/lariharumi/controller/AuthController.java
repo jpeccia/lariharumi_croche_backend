@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.croche.lariharumi.dto.LoginData;
 import com.croche.lariharumi.dto.RegisterData;
 import com.croche.lariharumi.service.AuthService;
 
@@ -32,8 +33,16 @@ public class AuthController {
 
     // Endpoint para login de usuário
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password) {
+    public ResponseEntity<String> login(@RequestBody LoginData loginData) {
+        // Extraímos email e password do DTO
+        String email = loginData.email();
+        String password = loginData.password();
+
+        // Chama o serviço de autenticação para fazer login e gerar o token
         String token = authService.login(email, password);
-        return ResponseEntity.ok(token);  // Retorna o token gerado
+        
+        // Retorna o token gerado
+        return ResponseEntity.ok(token);
     }
+
 }
