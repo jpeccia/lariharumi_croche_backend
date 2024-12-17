@@ -1,7 +1,6 @@
 package com.croche.lariharumi.models.Product;
 
 import com.croche.lariharumi.models.Category.Category;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

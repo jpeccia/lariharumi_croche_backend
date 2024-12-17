@@ -13,7 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -71,6 +73,20 @@ public class CategoryController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();  // Status 404 caso não encontre a categoria
         }
+    }
+
+        // Novo endpoint para upload de imagem de categoria
+    @PostMapping("/{id}/upload-image")
+    @Operation(summary = "Faz o upload de uma imagem para a categoria", description = "Endpoint para fazer o upload de uma imagem para uma categoria.")
+    @ApiResponse(responseCode = "200", description = "Imagem carregada com sucesso")
+    @ApiResponse(responseCode = "400", description = "Arquivo inválido ou erro no upload")
+    @ApiResponse(responseCode = "404", description = "Categoria não encontrada")
+    public ResponseEntity<Category> uploadCategoryImage(
+            @PathVariable Long id, // ID da categoria
+            @RequestParam("image") MultipartFile image) throws IOException { // Arquivo de imagem
+
+        Category updatedCategory = categoryService.uploadCategoryImage(id, image); // Chama o serviço para lidar com o upload
+        return ResponseEntity.ok(updatedCategory); // Retorna categoria atualizada
     }
 
     // Endpoint para excluir uma categoria
