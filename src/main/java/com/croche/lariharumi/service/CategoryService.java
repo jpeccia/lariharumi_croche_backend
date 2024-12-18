@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,7 +47,7 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-        private static final String IMAGE_DIR = "/path/to/images/"; // Caminho onde as imagens serão salvas
+        private static final String IMAGE_UPLOAD_DIR = "uploads/images/";
 
         public Category uploadCategoryImage(Long categoryId, MultipartFile image) throws IOException {
         Category category = categoryRepository.findById(categoryId)
@@ -56,7 +55,7 @@ public class CategoryService {
 
         // Salva a imagem
         String imageName = categoryId + "_" + image.getOriginalFilename();
-        Path imagePath = Paths.get(IMAGE_DIR + imageName);
+        Path imagePath = Paths.get(IMAGE_UPLOAD_DIR).resolve(imageName.replace("/uploads/images/", ""));
         Files.copy(image.getInputStream(), imagePath);
 
         // Salva o caminho da imagem no banco de dados

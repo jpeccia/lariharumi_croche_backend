@@ -4,8 +4,6 @@ import com.croche.lariharumi.dto.ProductDTO;
 import com.croche.lariharumi.models.Product.Product;
 import com.croche.lariharumi.repository.ProductRepository;
 import com.croche.lariharumi.service.ProductService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
