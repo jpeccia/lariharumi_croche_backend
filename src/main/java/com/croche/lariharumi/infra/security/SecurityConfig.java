@@ -42,9 +42,11 @@ public class SecurityConfig {
                     // Apenas usuários com a role ROLE_ADMIN têm acesso às rotas de criação, atualização e remoção de produtos e categorias
                     .requestMatchers(HttpMethod.GET, "/users").hasAuthority("ROLE_ADMIN")
                     .requestMatchers(HttpMethod.POST, "/products").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/products/{id}/upload-image").hasAuthority("ROLE_ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/products/{id}").hasAuthority("ROLE_ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/products/{id}").hasAuthority("ROLE_ADMIN")
                     .requestMatchers(HttpMethod.POST, "/categories").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/categories/{id}/upload-image").hasAuthority("ROLE_ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/categories/{id}").hasAuthority("ROLE_ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/categories/{id}").hasAuthority("ROLE_ADMIN")
                     // As rotas do admin devem ser protegidas e acessíveis apenas para "ROLE_ADMIN"
