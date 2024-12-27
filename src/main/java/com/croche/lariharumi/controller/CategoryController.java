@@ -39,7 +39,7 @@ public class CategoryController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    private static final String IMAGE_UPLOAD_DIR = "uploads/images";
+    private static final String IMAGE_UPLOAD_DIR = "src/main/resources/static/uploads/images";
 
     // Endpoint para criar uma nova categoria
     @PostMapping
@@ -91,12 +91,6 @@ public class CategoryController {
 
         // Novo endpoint para upload de imagem de categoria
         @PostMapping("/{id}/upload-image")
-        @Operation(summary = "Faz o upload de uma imagem para a categoria")
-        @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Imagem carregada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Arquivo inválido ou erro no upload"),
-            @ApiResponse(responseCode = "404", description = "Categoria não encontrada")
-        })
         public ResponseEntity<?> uploadCategoryImage(
                 @PathVariable Long id,
                 @RequestParam("image") MultipartFile file) {
@@ -129,10 +123,9 @@ public class CategoryController {
                 String imageUrl = "/uploads/images/" + filename;
         
                 // Atualiza o campo de imagem da categoria
-                existingCategory.setImage(imageUrl); // Supondo que o campo seja "image"
+                existingCategory.setImage(imageUrl);
                 categoryRepository.save(existingCategory);
         
-                // Retorna a URL da imagem
                 return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -141,50 +134,46 @@ public class CategoryController {
         }
         
 
-    @GetMapping("/{id}/image")
-    @Operation(summary = "Retorna a imagem de uma categoria")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Imagem retornada com sucesso"),
-        @ApiResponse(responseCode = "404", description = "Categoria não encontrada ou imagem não encontrada")
-    })
-    public ResponseEntity<?> getCategoryImage(@PathVariable Long id) {
-        try {
-            // Verifica se a categoria existe
-            Optional<Category> existingCategoryOpt = categoryRepository.findById(id);
-            if (existingCategoryOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Categoria não encontrada");
+        @GetMapping("/{id}/image")
+        public ResponseEntity<?> getCategoryImage(@PathVariable Long id) {
+            try {
+                // Verifica se a categoria existe
+                Optional<Category> existingCategoryOpt = categoryRepository.findById(id);
+                if (existingCategoryOpt.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Categoria não encontrada");
+                }
+        
+                Category existingCategory = existingCategoryOpt.get();
+        
+                // Verifica se a categoria tem uma imagem associada
+                String imageUrl = existingCategory.getImage();
+                if (imageUrl == null || imageUrl.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imagem não encontrada");
+                }
+        
+                // Resolva o caminho completo da imagem com base no diretório de upload
+                Path imagePath = Paths.get(IMAGE_UPLOAD_DIR).resolve(imageUrl.replace("/uploads/images/", ""));
+        
+                // Verifica se o arquivo da imagem existe
+                if (!Files.exists(imagePath)) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imagem não encontrada");
+                }
+        
+                // Cria um recurso de arquivo para a imagem
+                FileSystemResource resource = new FileSystemResource(imagePath);
+                if (resource.exists()) {
+                    // Retorna a imagem com o tipo de mídia adequado
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.IMAGE_JPEG) // Ou outro tipo de imagem conforme o arquivo
+                            .body(resource);
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imagem não encontrada");
+                }
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar a imagem: " + e.getMessage());
             }
-
-            Category existingCategory = existingCategoryOpt.get();
-
-            // Verifica se a categoria tem uma imagem associada
-            String imageUrl = existingCategory.getImage();
-            if (imageUrl == null || imageUrl.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imagem não encontrada");
-            }
-
-            // Resolva o caminho completo da imagem com base no diretório de upload
-            Path imagePath = Paths.get(IMAGE_UPLOAD_DIR).resolve(imageUrl.replace("/uploads/images/", ""));
-
-            // Verifica se o arquivo da imagem existe
-            if (!Files.exists(imagePath)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imagem não encontrada");
-            }
-
-            // Cria um recurso de arquivo para a imagem
-            FileSystemResource resource = new FileSystemResource(imagePath);
-            if (resource.exists()) {
-                // Retorna a imagem com o tipo de mídia adequado
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_PNG) // Ou outro tipo de imagem conforme o arquivo
-                        .body(resource);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imagem não encontrada");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar a imagem: " + e.getMessage());
         }
-    }
+        
 
     // Endpoint para excluir uma categoria
     @DeleteMapping("/{id}")
