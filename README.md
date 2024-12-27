@@ -61,7 +61,7 @@ Este projeto utiliza variáveis de ambiente para gerenciar dados sensíveis, com
 # Configurações de Banco de Dados
 DB_USERNAME=seuUsuario
 DB_PASSWORD=suaSenha
-DB_URL=jdbc:postgresql://localhost:5432/levelinglife
+DB_URL=jdbc:postgresql://localhost:5432/laricroche
 
 # JWT Token para autenticação
 JWT_SECRET=suaChaveSecreta
