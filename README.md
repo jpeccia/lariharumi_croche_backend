@@ -28,7 +28,6 @@
 - **Docker** 🐳: Containers para isolar o ambiente e facilitar o desenvolvimento e a implantação.
 - **Insomnia** 🌐: Ferramenta de teste para endpoints durante o desenvolvimento.
 - **PostgreSQL** 🗄️: Banco de dados relacional utilizado para persistir os dados da aplicação.
-- **JUnit e Mockito** 🧪: Ferramentas para testes unitários e de integração.
 
 ---
 
