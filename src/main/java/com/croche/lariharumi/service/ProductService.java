@@ -76,22 +76,6 @@ public class ProductService {
         // Salva as mudanças no banco de dados
         return productRepository.save(product);
     }
-    
-        private static final String IMAGE_DIR = "/path/to/images/"; // Caminho onde as imagens serão salvas
-
-    public Product uploadProductImage(Long productId, MultipartFile image) throws IOException {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-
-        // Salva a imagem
-        String imageName = productId + "_" + image.getOriginalFilename();
-        Path imagePath = Paths.get(IMAGE_DIR + imageName);
-        Files.copy(image.getInputStream(), imagePath);
-
-        // Salva o caminho da imagem no banco de dados
-        product.setImage(imageName); // Assumindo que a classe Product tem um campo `imagePath`
-        return productRepository.save(product);
-    }
 
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));

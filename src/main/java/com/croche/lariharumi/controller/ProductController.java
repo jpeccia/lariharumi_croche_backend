@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,16 +104,16 @@ public class ProductController {
         return ResponseEntity.ok(updatedProduct);
     }
 
-    @PostMapping("/{id}/upload-image")
-    @Operation(summary = "Faz o upload de uma imagem para o produto")
+    @PostMapping("/{id}/upload-images")
+    @Operation(summary = "Faz o upload de múltiplas imagens para o produto")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Imagem carregada com sucesso"),
+        @ApiResponse(responseCode = "200", description = "Imagens carregadas com sucesso"),
         @ApiResponse(responseCode = "400", description = "Arquivo inválido ou erro no upload"),
         @ApiResponse(responseCode = "404", description = "Produto não encontrado")
     })
-    public ResponseEntity<?> uploadProductImage(
+    public ResponseEntity<?> uploadProductImages(
             @PathVariable Long id,
-            @RequestParam("image") MultipartFile file) {
+            @RequestParam("images") List<MultipartFile> files) {
         try {
             // Verifica se o produto existe
             Optional<Product> existingProductOpt = productRepository.findById(id);
@@ -121,82 +122,72 @@ public class ProductController {
             }
 
             Product existingProduct = existingProductOpt.get();
+            List<String> imageUrls = existingProduct.getImages() != null ? existingProduct.getImages() : new ArrayList<>();
 
-            // Valida se o arquivo é uma imagem
-            if (!file.getContentType().startsWith("image/")) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("O arquivo enviado não é uma imagem");
+            // Processa cada arquivo de imagem
+            for (MultipartFile file : files) {
+                if (!file.getContentType().startsWith("image/")) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Um ou mais arquivos não são imagens");
+                }
+
+                // Cria o diretório de upload se não existir
+                Path dirPath = Paths.get(IMAGE_UPLOAD_DIR);
+                if (!Files.exists(dirPath)) {
+                    Files.createDirectories(dirPath);
+                }
+
+                // Salva o arquivo
+                String filename = id + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                Path filePath = dirPath.resolve(filename);
+                Files.write(filePath, file.getBytes());
+
+                // Gera a URL de acesso à imagem
+                String imageUrl = "/uploads/images/" + filename;
+                imageUrls.add(imageUrl);
             }
 
-            // Cria o diretório de upload se não existir
-            Path dirPath = Paths.get(IMAGE_UPLOAD_DIR);
-            if (!Files.exists(dirPath)) {
-                Files.createDirectories(dirPath);
-            }
-
-            // Salva o arquivo
-            String filename = id + "_" + file.getOriginalFilename();
-            Path filePath = dirPath.resolve(filename);
-            Files.write(filePath, file.getBytes());
-
-            // Gera a URL de acesso à imagem
-            String imageUrl = "/uploads/images/" + filename;
-
-            // Atualiza o campo de imagem do produto
-            existingProduct.setImage(imageUrl); // Supondo que o campo seja "image"
+            // Atualiza o campo de imagens do produto
+            existingProduct.setImages(imageUrls); // Supondo que o campo seja uma lista de URLs
             productRepository.save(existingProduct);
 
-            // Retorna a URL da imagem
-            return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
+            // Retorna as URLs das imagens
+            return ResponseEntity.ok(Map.of("imageUrls", imageUrls));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erro ao salvar a imagem: " + e.getMessage());
+                    .body("Erro ao salvar as imagens: " + e.getMessage());
         }
     }
 
-    @GetMapping("/{id}/image")
-    @Operation(summary = "Retorna a imagem de um produto")
+    @GetMapping("/{id}/images")
+    @Operation(summary = "Retorna as imagens de um produto")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Imagem retornada com sucesso"),
-        @ApiResponse(responseCode = "404", description = "Produto não encontrado ou imagem não encontrada")
+        @ApiResponse(responseCode = "200", description = "Imagens retornadas com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Produto não encontrado ou imagens não encontradas")
     })
-    public ResponseEntity<?> getProductImage(@PathVariable Long id) {
+    public ResponseEntity<?> getProductImages(@PathVariable Long id) {
         try {
             // Verifica se o produto existe
             Optional<Product> existingProductOpt = productRepository.findById(id);
             if (existingProductOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto não encontrado");
             }
-
+    
             Product existingProduct = existingProductOpt.get();
-
-            // Verifica se o produto tem uma imagem associada
-            String imageUrl = existingProduct.getImage();
-            if (imageUrl == null || imageUrl.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imagem não encontrada");
+    
+            // Verifica se o produto tem imagens associadas
+            List<String> imageUrls = existingProduct.getImages();
+            if (imageUrls == null || imageUrls.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhuma imagem encontrada para este produto");
             }
-
-            // Resolva o caminho completo da imagem com base no diretório de upload
-            Path imagePath = Paths.get(IMAGE_UPLOAD_DIR).resolve(imageUrl.replace("/uploads/images/", ""));
-
-            // Verifica se o arquivo da imagem existe
-            if (!Files.exists(imagePath)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imagem não encontrada");
-            }
-
-            // Cria um recurso de arquivo para a imagem
-            FileSystemResource resource = new FileSystemResource(imagePath);
-            if (resource.exists()) {
-                // Retorna a imagem com o tipo de mídia adequado
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG) // Ou outro tipo de imagem conforme o arquivo
-                        .body(resource);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imagem não encontrada");
-            }
+    
+            // Retorna as URLs das imagens
+            return ResponseEntity.ok(Map.of("imageUrls", imageUrls));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar a imagem: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao buscar as imagens: " + e.getMessage());
         }
     }
+    
     
 
 

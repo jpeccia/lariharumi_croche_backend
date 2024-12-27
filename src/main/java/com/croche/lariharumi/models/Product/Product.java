@@ -1,7 +1,10 @@
 package com.croche.lariharumi.models.Product;
 
+import java.util.List;
+
 import com.croche.lariharumi.models.Category.Category;
 
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,7 +25,10 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String image;
+
+    @ElementCollection
+    private List<String> images;
+    
     private String priceRange;
     private String description;
 
