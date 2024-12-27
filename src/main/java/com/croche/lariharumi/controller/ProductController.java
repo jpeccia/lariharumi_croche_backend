@@ -189,7 +189,44 @@ public ResponseEntity<?> uploadProductImage(
     }
     
     
-
+    @DeleteMapping("/{id}/images/{imageIndex}")
+    @Operation(summary = "Remove uma imagem do produto", description = "Remove uma imagem específica de um produto.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Imagem removida com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Produto ou imagem não encontrada"),
+        @ApiResponse(responseCode = "400", description = "Índice de imagem inválido")
+    })
+    public ResponseEntity<?> removeProductImage(
+            @PathVariable Long id, 
+            @PathVariable int imageIndex) {
+        try {
+            // Verifica se o produto existe
+            Optional<Product> existingProductOpt = productRepository.findById(id);
+            if (existingProductOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto não encontrado");
+            }
+    
+            Product existingProduct = existingProductOpt.get();
+    
+            // Verifica se o índice da imagem é válido
+            List<String> imageUrls = existingProduct.getImageUrls();
+            if (imageUrls == null || imageUrls.isEmpty() || imageIndex < 0 || imageIndex >= imageUrls.size()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Índice de imagem inválido");
+            }
+    
+            // Remove a imagem da lista
+            imageUrls.remove(imageIndex);
+    
+            // Atualiza o produto no banco
+            productRepository.save(existingProduct);
+    
+            // Retorna uma resposta de sucesso
+            return ResponseEntity.ok("Imagem removida com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao remover a imagem: " + e.getMessage());
+        }
+    }
+    
 
 
     @DeleteMapping("/{id}")
