@@ -1,4 +1,4 @@
-<h1 align="center" style="font-weight: bold;">Leveling Life 💻</h1>
+<h1 align="center" style="font-weight: bold;">Lari faz Crochê! Back End</h1>
 
 <p align="center">
   <a href="#functions">Funcionalidades</a> •
