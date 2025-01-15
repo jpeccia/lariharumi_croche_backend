@@ -5,7 +5,8 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copie o arquivo JAR da aplicação para dentro do contêiner
-COPY target/your-app-name.jar /app/app.jar
+COPY target/lariharumi-0.0.1-SNAPSHOT.jar /app/app.jar
+
 
 # Exponha a porta que sua aplicação vai rodar
 EXPOSE 8080
