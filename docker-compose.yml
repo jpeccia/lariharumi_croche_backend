@@ -10,3 +10,27 @@ services:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: laricroche
+    networks:
+      - laricroche_network
+
+  spring_app:
+    container_name: laricroche_spring
+    build:
+      context: .
+      dockerfile: Dockerfile # Certifique-se de ter um Dockerfile na raiz do projeto
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/laricroche
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: prod
+    networks:
+      - laricroche_network
+    restart: always
+
+networks:
+  laricroche_network:
+    driver: bridge
